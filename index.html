@@ -17,79 +17,113 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  background: #f4f1eb;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 #map {
   width: 100%;
-  height: 100vh;
-  background: #f4f1ec;
+  height: 100%;
+  background: #f4f1eb;
 }
 
+/* Kartenbeschriftungen dezent halten */
+.leaflet-control-attribution {
+  background: rgba(244,241,235,0.85) !important;
+  color: #777 !important;
+  font-size: 9px;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.leaflet-control-zoom a {
+  background: rgba(255,255,255,0.92) !important;
+  color: #222 !important;
+  border: none !important;
+}
+
+/* Stadtmarker */
 .city-marker {
-  width: 22px;
-  height: 22px;
   position: relative;
+  width: 150px;
+  height: 60px;
+  transform: translate(-75px, -30px);
+  pointer-events: none;
 }
 
-.city-marker::before {
-  content: "";
+.city-dot {
   position: absolute;
-  width: 22px;
-  height: 22px;
-  border: 2px solid #e30613;
+  left: 68px;
+  top: 22px;
+  width: 14px;
+  height: 14px;
+  background: #c9002b;
   border-radius: 50%;
+  box-shadow:
+    0 0 0 5px rgba(201,0,43,0.12),
+    0 0 18px rgba(201,0,43,0.45);
   animation: pulse 2s infinite;
 }
 
-.city-marker::after {
-  content: "";
+.city-name {
   position: absolute;
-  width: 9px;
-  height: 9px;
-  background: #e30613;
-  border-radius: 50%;
-  top: 7px;
-  left: 7px;
-  box-shadow: 0 0 14px rgba(227,6,19,.8);
+  left: 88px;
+  top: 17px;
+  white-space: nowrap;
+  color: #171717;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(244,241,235,0.9);
+  padding: 5px 9px;
+  border-radius: 3px;
 }
 
 @keyframes pulse {
   0% {
-    transform: scale(.7);
-    opacity: 1;
+    box-shadow:
+      0 0 0 4px rgba(201,0,43,0.12),
+      0 0 12px rgba(201,0,43,0.35);
   }
 
-  70% {
-    transform: scale(2);
-    opacity: 0;
+  50% {
+    box-shadow:
+      0 0 0 9px rgba(201,0,43,0.04),
+      0 0 24px rgba(201,0,43,0.55);
   }
 
   100% {
-    opacity: 0;
+    box-shadow:
+      0 0 0 4px rgba(201,0,43,0.12),
+      0 0 12px rgba(201,0,43,0.35);
   }
 }
 
-.city-label {
-  background: white;
-  border: none !important;
+/* Popup */
+.leaflet-popup-content-wrapper {
   border-radius: 4px;
-  padding: 6px 10px;
-  color: #111;
-  font-family: Arial, sans-serif;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.leaflet-popup-content {
+  margin: 16px 20px;
   font-size: 15px;
-  font-weight: 600;
-  box-shadow: 0 3px 14px rgba(0,0,0,.15);
+  color: #222;
 }
 
-.leaflet-tooltip.city-label::before {
-  display: none;
+.popup-title {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 
-.leaflet-control-zoom a {
-  width: 38px !important;
-  height: 38px !important;
-  line-height: 38px !important;
-  font-size: 20px !important;
+.popup-text {
+  color: #666;
+  font-size: 13px;
 }
 </style>
 </head>
@@ -104,93 +138,114 @@ html, body {
 
 const map = L.map("map", {
   zoomControl: true,
-  dragging: true,
-  scrollWheelZoom: true,
-  doubleClickZoom: true,
-  touchZoom: true,
   minZoom: 5,
-  maxZoom: 12
+  maxZoom: 12,
+  zoomSnap: 0.5
 });
 
-map.setView([51.2, 10.4], 6);
-
+/* Helle, hochwertige Kartenebene */
 L.tileLayer(
-  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
   {
-    maxZoom: 19,
+    maxZoom: 20,
     attribution:
-      '&copy; OpenStreetMap contributors'
+      '&copy; OpenStreetMap-Mitwirkende &copy; CARTO'
   }
 ).addTo(map);
 
+
+/* Deutschland als Ausgangspunkt */
+map.setView([51.2, 10.4], 6);
+
+
+/* Unsere fünf ECHT-PASSIERT-Städte */
 const cities = [
-
-  {
-    name: "Hamburg",
-    lat: 53.5511,
-    lon: 9.9937
-  },
-
   {
     name: "Berlin",
     lat: 52.5200,
     lon: 13.4050
   },
-
+  {
+    name: "Hamburg",
+    lat: 53.5511,
+    lon: 9.9937
+  },
   {
     name: "Köln",
     lat: 50.9375,
     lon: 6.9603
   },
-
-  {
-    name: "Dresden",
-    lat: 51.0504,
-    lon: 13.7373
-  },
-
   {
     name: "München",
     lat: 48.1351,
     lon: 11.5820
+  },
+  {
+    name: "Dresden",
+    lat: 51.0504,
+    lon: 13.7373
   }
-
 ];
 
+
+/* Städte erstellen */
 cities.forEach(city => {
 
   const icon = L.divIcon({
     className: "",
-    html: '<div class="city-marker"></div>',
-    iconSize: [22,22],
-    iconAnchor: [11,11]
+    html: `
+      <div class="city-marker">
+        <div class="city-dot"></div>
+        <div class="city-name">${city.name}</div>
+      </div>
+    `,
+    iconSize: [150, 60],
+    iconAnchor: [75, 30]
   });
 
   const marker = L.marker(
     [city.lat, city.lon],
-    { icon: icon }
+    {
+      icon: icon
+    }
   ).addTo(map);
 
-  marker.bindTooltip(
-    city.name,
-    {
-      permanent: true,
-      direction: "right",
-      offset: [15,0],
-      className: "city-label"
-    }
-  );
 
+  /* Klick auf Stadt */
   marker.on("click", function() {
 
-    alert(
-      "Hier wird später die " +
-      city.name +
-      "-Seite geöffnet."
+    map.flyTo(
+      [city.lat, city.lon],
+      9,
+      {
+        duration: 1.2
+      }
     );
+
+    setTimeout(() => {
+
+      marker.bindPopup(`
+        <div class="popup-title">${city.name}</div>
+        <div class="popup-text">
+          ECHT PASSIERT Geschichten aus ${city.name}
+        </div>
+      `).openPopup();
+
+    }, 900);
 
   });
 
+});
+
+
+/* Deutschland beim Start schön einpassen */
+const germanyBounds = [
+  [47.2, 5.8],
+  [55.1, 15.2]
+];
+
+map.fitBounds(germanyBounds, {
+  padding: [20, 20]
 });
 
 </script>
