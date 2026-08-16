@@ -289,36 +289,40 @@ cities.forEach(city => {
 
   marker.on("click", function() {
 
-    map.flyTo(
-      [city.lat, city.lon],
-      9,
-      {
-        duration: 1.2
-      }
-    );
+  map.flyTo(
+    [city.lat, city.lon],
+    9,
+    {
+      duration: 1.2
+    }
+  );
 
+  setTimeout(() => {
 
-    setTimeout(function() {
+    marker.bindPopup(`
+      <div class="popup-kicker">
+        ECHT PASSIERT
+      </div>
 
-      marker.bindPopup(`
+      <div class="popup-title">
+        ${city.name}
+      </div>
 
-        <div class="popup-kicker">
-          ECHT PASSIERT
-        </div>
+      <div class="popup-text">
+        Geschichten aus ${city.name}
+      </div>
 
-        <div class="popup-title">
-          ${city.name}
-        </div>
+      <button
+        class="popup-button"
+        onclick="alert('Hier werden bald die Geschichten aus ${city.name} angezeigt.')"
+      >
+        Geschichten entdecken →
+      </button>
+    `).openPopup();
 
-        <div class="popup-text">
-          Geschichten aus ${city.name}
-        </div>
+  }, 900);
 
-      `).openPopup();
-
-    }, 900);
-
-  });
+});
 
 });
 
