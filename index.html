@@ -314,7 +314,7 @@ cities.forEach(city => {
 
       <button
         class="popup-button"
-        onclick="alert('Hier werden bald die Geschichten aus ${city.name} angezeigt.')"
+        onclick="window.location.href='/${city.name.toLowerCase()}'"
       >
         Geschichten entdecken →
       </button>
