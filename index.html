@@ -28,102 +28,157 @@ html, body {
   background: #f4f1eb;
 }
 
-/* Kartenbeschriftungen dezent halten */
-.leaflet-control-attribution {
-  background: rgba(244,241,235,0.85) !important;
-  color: #777 !important;
-  font-size: 9px;
-}
-
+/* Zoom-Steuerung */
 .leaflet-control-zoom {
   border: none !important;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
 }
 
 .leaflet-control-zoom a {
-  background: rgba(255,255,255,0.92) !important;
-  color: #222 !important;
+  width: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  background: rgba(255,255,255,0.95) !important;
+  color: #181818 !important;
   border: none !important;
+  font-weight: 400;
+}
+
+/* Kartenhinweis */
+.leaflet-control-attribution {
+  background: rgba(244,241,235,0.85) !important;
+  color: #888 !important;
+  font-size: 9px;
 }
 
 /* Stadtmarker */
 .city-marker {
   position: relative;
-  width: 150px;
-  height: 60px;
-  transform: translate(-75px, -30px);
-  pointer-events: none;
+  width: 190px;
+  height: 70px;
+  transform: translate(-95px, -35px);
+  cursor: pointer;
 }
 
+/* Leuchtender Punkt */
 .city-dot {
   position: absolute;
-  left: 68px;
-  top: 22px;
-  width: 14px;
-  height: 14px;
+  left: 83px;
+  top: 28px;
+  width: 12px;
+  height: 12px;
   background: #c9002b;
   border-radius: 50%;
   box-shadow:
-    0 0 0 5px rgba(201,0,43,0.12),
-    0 0 18px rgba(201,0,43,0.45);
-  animation: pulse 2s infinite;
+    0 0 0 4px rgba(201,0,43,0.10),
+    0 0 12px rgba(201,0,43,0.45);
 }
 
-.city-name {
+/* Pulsieren */
+.city-dot::after {
+  content: "";
   position: absolute;
-  left: 88px;
-  top: 17px;
-  white-space: nowrap;
-  color: #171717;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  background: rgba(244,241,235,0.9);
-  padding: 5px 9px;
-  border-radius: 3px;
+  width: 12px;
+  height: 12px;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  border: 1px solid #c9002b;
+  animation: cityPulse 2.2s ease-out infinite;
 }
 
-@keyframes pulse {
+@keyframes cityPulse {
   0% {
-    box-shadow:
-      0 0 0 4px rgba(201,0,43,0.12),
-      0 0 12px rgba(201,0,43,0.35);
+    transform: scale(1);
+    opacity: 0.8;
   }
 
-  50% {
-    box-shadow:
-      0 0 0 9px rgba(201,0,43,0.04),
-      0 0 24px rgba(201,0,43,0.55);
+  70% {
+    transform: scale(2.8);
+    opacity: 0;
   }
 
   100% {
-    box-shadow:
-      0 0 0 4px rgba(201,0,43,0.12),
-      0 0 12px rgba(201,0,43,0.35);
+    transform: scale(2.8);
+    opacity: 0;
   }
 }
 
+/* Städtenamen */
+.city-name {
+  position: absolute;
+  left: 106px;
+  top: 20px;
+
+  white-space: nowrap;
+
+  color: #161616;
+  background: rgba(244,241,235,0.94);
+
+  padding: 5px 9px;
+
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+
+  border-left: 2px solid #c9002b;
+
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease;
+}
+
+/* Hover */
+.city-marker:hover .city-name {
+  transform: translateX(4px);
+  background: #ffffff;
+}
+
+.city-marker:hover .city-dot {
+  box-shadow:
+    0 0 0 5px rgba(201,0,43,0.14),
+    0 0 22px rgba(201,0,43,0.65);
+}
+
+
 /* Popup */
 .leaflet-popup-content-wrapper {
-  border-radius: 4px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  background: #f4f1eb;
+  border-radius: 2px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+}
+
+.leaflet-popup-tip {
+  background: #f4f1eb;
 }
 
 .leaflet-popup-content {
-  margin: 16px 20px;
-  font-size: 15px;
-  color: #222;
+  margin: 20px 22px;
+  min-width: 190px;
+}
+
+.popup-kicker {
+  color: #c9002b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
 }
 
 .popup-title {
-  font-size: 19px;
+  color: #151515;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .popup-text {
   color: #666;
   font-size: 13px;
+  line-height: 1.5;
 }
 </style>
 </head>
@@ -138,12 +193,17 @@ html, body {
 
 const map = L.map("map", {
   zoomControl: true,
+  dragging: true,
+  scrollWheelZoom: true,
+  doubleClickZoom: true,
+  touchZoom: true,
   minZoom: 5,
   maxZoom: 12,
   zoomSnap: 0.5
 });
 
-/* Helle, hochwertige Kartenebene */
+
+/* Helle Editorial-Karte */
 L.tileLayer(
   "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
   {
@@ -154,64 +214,79 @@ L.tileLayer(
 ).addTo(map);
 
 
-/* Deutschland als Ausgangspunkt */
-map.setView([51.2, 10.4], 6);
-
-
-/* Unsere fünf ECHT-PASSIERT-Städte */
+/* Städte */
 const cities = [
+
   {
     name: "Berlin",
     lat: 52.5200,
     lon: 13.4050
   },
+
   {
     name: "Hamburg",
     lat: 53.5511,
     lon: 9.9937
   },
+
   {
     name: "Köln",
     lat: 50.9375,
     lon: 6.9603
   },
+
   {
     name: "München",
     lat: 48.1351,
     lon: 11.5820
   },
+
   {
     name: "Dresden",
     lat: 51.0504,
     lon: 13.7373
   }
+
 ];
 
 
-/* Städte erstellen */
+/* Städte auf Karte setzen */
 cities.forEach(city => {
 
   const icon = L.divIcon({
+
     className: "",
+
     html: `
       <div class="city-marker">
+
         <div class="city-dot"></div>
-        <div class="city-name">${city.name}</div>
+
+        <div class="city-name">
+          ${city.name}
+        </div>
+
       </div>
     `,
-    iconSize: [150, 60],
-    iconAnchor: [75, 30]
+
+    iconSize: [190,70],
+
+    iconAnchor: [95,35]
+
   });
+
 
   const marker = L.marker(
     [city.lat, city.lon],
     {
-      icon: icon
+      icon: icon,
+      interactive: true
     }
   ).addTo(map);
 
 
   /* Klick auf Stadt */
+
   marker.on("click", function() {
 
     map.flyTo(
@@ -222,13 +297,23 @@ cities.forEach(city => {
       }
     );
 
-    setTimeout(() => {
+
+    setTimeout(function() {
 
       marker.bindPopup(`
-        <div class="popup-title">${city.name}</div>
-        <div class="popup-text">
-          ECHT PASSIERT Geschichten aus ${city.name}
+
+        <div class="popup-kicker">
+          ECHT PASSIERT
         </div>
+
+        <div class="popup-title">
+          ${city.name}
+        </div>
+
+        <div class="popup-text">
+          Geschichten aus ${city.name}
+        </div>
+
       `).openPopup();
 
     }, 900);
@@ -238,15 +323,19 @@ cities.forEach(city => {
 });
 
 
-/* Deutschland beim Start schön einpassen */
+/* Deutschland beim Start einpassen */
+
 const germanyBounds = [
   [47.2, 5.8],
   [55.1, 15.2]
 ];
 
-map.fitBounds(germanyBounds, {
-  padding: [20, 20]
-});
+map.fitBounds(
+  germanyBounds,
+  {
+    padding: [25,25]
+  }
+);
 
 </script>
 
